@@ -24,8 +24,8 @@ export class ProductsService {
     return this.productRepository.getProductById(id);
   }
 
-  async update(Product: Product): Promise<string> {
-    return this.productRepository.updateProduct(Product);
+  async update(id:string, Product: CreateProductDto): Promise<string> {
+    return this.productRepository.updateProduct(id, Product);
   }
 
   async remove(id: string): Promise<string> {

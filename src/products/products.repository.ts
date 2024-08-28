@@ -105,17 +105,18 @@ export class ProductsRepository{
         let productsAdded = []
         this.listProducts.forEach(async (product) => {
             const category: CategoryEntity = await this.categoryRepository.findOne({where: {name: product.category}})
-            const newProduct: CreateProductDto = {...product, category: category}
-            const result = await this.productRepository.save(newProduct)
+            // const newProduct: Product = {...product, category: category}
+            const result = await this.productRepository.save({...product, category: category})
             productsAdded.push({id: result.id})
         })
-        return productsAdded
+        return "The products have been added to the list of products"
     }
 
     async createProduct(product: CreateProductDto): Promise<string>{
+        const category = await this.categoryRepository.findOneBy({id: product.category.id})
         // const id = this.products.length + 1;
         // this.products.push({id, ...product})
-        const newProduct = await this.productRepository.save(product)
+        const newProduct = await this.productRepository.save({...product, category: category})
         return newProduct.id
     }
 
@@ -132,8 +133,8 @@ export class ProductsRepository{
         return findedProduct
     }
 
-    async updateProduct(newProduct: Product): Promise<string>{
-        const lastProduct: Product = await this.productRepository.findOneBy({id: newProduct.id})
+    async updateProduct(id:string, newProduct: CreateProductDto): Promise<string>{
+        const lastProduct: Product = await this.productRepository.findOneBy({id: id})
         const updatedProduct: Product = await this.productRepository.merge(lastProduct, newProduct)
         await this.productRepository.save(updatedProduct)
         return updatedProduct.id

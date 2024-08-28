@@ -27,7 +27,7 @@ export class CreateOrderDto {
      */
     @IsArray()
     @ArrayMinSize(1)
-    @ValidateNested({each: true})
+    // @ValidateNested({each: true})
     @Type(() => CreateProductDto)
     products: Product[]
 }

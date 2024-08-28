@@ -45,7 +45,7 @@ export class ProductsController {
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolGuard)
   update(@Param('id') id: string, @Body() createProductDto: CreateProductDto) {
-    return this.productsService.update({id: id, ...createProductDto});
+    return this.productsService.update(id, createProductDto);
   }
 
   @ApiBearerAuth()

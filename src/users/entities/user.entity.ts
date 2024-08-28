@@ -30,7 +30,7 @@ export class UserEntity {
 
     @Column({
         type: "varchar",
-        length: 20
+        length: 80
     })
     address: string
 

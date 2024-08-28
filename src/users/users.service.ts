@@ -21,8 +21,8 @@ export class UsersService {
     return this.usersRepository.getUserById(id);
   }
 
-  async update(user: CreateUserDto): Promise<string> {
-    return this.usersRepository.updateUser(user);
+  async update(id:string, user: CreateUserDto): Promise<string> {
+    return this.usersRepository.updateUser(id, user);
   }
 
   async remove(id: string): Promise<string> {

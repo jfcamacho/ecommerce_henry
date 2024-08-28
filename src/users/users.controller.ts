@@ -50,7 +50,7 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @HttpCode(200)
   async update(@Param('id') id: string, @Body() user: CreateUserDto) {
-    return await this.usersService.update({id: id, ...user});
+    return await this.usersService.update(id, user);
   }
 
   @ApiBearerAuth()

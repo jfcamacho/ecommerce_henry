@@ -3,14 +3,6 @@ import { CategoryEntity } from "../../categories/entities/category.entity"
 import { OrderDetailEntity } from "../../orders/entities/orderdetails.entity"
 
 export class CreateProductDto {
-    
-    /**
-     * Identificador del producto no se requiere para la creación de un producto
-     */
-    @IsOptional()
-    @IsString()
-    @IsUUID()
-    id?:string
 
     /**
      * Nombre del producto
@@ -50,7 +42,7 @@ export class CreateProductDto {
 
     /**
      * A que categoria pertenece el producto asociado
-     * @example tecnología
+     * @example monitor
      */
     @IsOptional()
     category?: CategoryEntity;

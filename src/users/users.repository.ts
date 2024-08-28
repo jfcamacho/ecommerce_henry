@@ -1,89 +1,57 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable } from "@nestjs/common";
 import { UserEntity } from "./entities/user.entity";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { Auth } from "../auth/entities/auth.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import  * as bcrypt from "bcrypt"
 
 @Injectable()
 export class UserRepository{
 
     constructor(@InjectRepository(UserEntity) private usersRepository: Repository<UserEntity>){}
 
-    users: CreateUserDto[] = [
-        // {
-        //     id: '1',
-        //     email: "antonio@email.com",
-        //     name: "Antonio",
-        //     password: "antonio",
-        //     address: "Los olivos",
-        //     phone: "123456789",
-        //     country: "Panamá",
-        //     city: "Panamá",
-        // },
-        // {
-        //     id: 2,
-        //     email: "carmen@email.com",
-        //     name: "Carmen",
-        //     password: "carmen",
-        //     address: "Los almendros",
-        //     phone: "987654321",
-        //     country: "México",
-        //     city: "Ciudad de méxico",
-        // },
-        // {
-        //     id: 3,
-        //     email: "estela@email.com",
-        //     name: "Estela",
-        //     password: "estela",
-        //     address: "París 19-501",
-        //     phone: "111111111",
-        //     country: "España",
-        //     city: "Madrir",
-        // }
-    ]
-
     async createUser(user: CreateUserDto): Promise<UserEntity>{
         const newUser = await this.usersRepository.save(user)
         return newUser
     }
 
-    async sigin(auth: Auth){
-        if(auth.email === "" || auth.password === ""){
-            return "No es posible ingresar al APP"
-        }else{
-            let findedUser = await this.users.find((user: UserEntity) => user.email === auth.email && user.password === auth.password)
-            if(findedUser){
-                delete findedUser.isAdmin
-                return findedUser
-            }else{
-                return "Email o password incorrectos"
-            }
-        }
-    }
+    // async sigin(auth: Auth){
+    //     if(auth.email === "" || auth.password === ""){
+    //         return "No es posible ingresar al APP"
+    //     }else{
+    //         let findedUser = await this.users.find((user: UserEntity) => user.email === auth.email && user.password === auth.password)
+    //         if(findedUser){
+    //             delete findedUser.isAdmin
+    //             return findedUser
+    //         }else{
+    //             return "Email o password incorrectos"
+    //         }
+    //     }
+    // }
 
     async getUsers(page: number, limit: number): Promise<UserEntity[]>{
-        let listUsers: UserEntity[] = []
-        const SearchUsers: UserEntity[] = await this.usersRepository.find()
-        for(let x = (page-1)*limit; x < limit; x++){
-            if(SearchUsers[x]){
-                listUsers.push({...SearchUsers[x],password: undefined})
-            }else{
-                break
-            }
-        }
-        return listUsers
+        const offset = (page - 1) * limit;
+        const SearchUsers: UserEntity[] = await this.usersRepository.find({
+            skip: offset,
+            take: limit,
+          })
+        return SearchUsers
     }
 
     async getUserById(id: string): Promise<UserEntity>{
-        const newUser: UserEntity = await this.usersRepository.findOne({
-            relations: {
-                orders: true
-            },
-            where: {id: id}
-        })
-        delete newUser.isAdmin
-        return newUser
+        try {
+            const newUser: UserEntity = await this.usersRepository.findOne({
+                relations: {
+                    orders: true
+                },
+                where: {id: id}
+            })
+            delete newUser.isAdmin
+            return newUser
+        } catch (error) {
+            throw new BadRequestException('Error en el id solicitado')
+        }
     }
 
     async getUserByEmail(email: string): Promise<UserEntity>{
@@ -91,18 +59,30 @@ export class UserRepository{
         return newUser
     }
 
-    async updateUser(newUser: CreateUserDto): Promise<string>{
-        this.users = this.users.map((user: CreateUserDto) => {
-            return user.id === newUser.id 
-            ? newUser
-            : user
-        })
-        return this.users.find((user: UserEntity) => user.id === newUser.id).id
+    async updateUser(id:string, newUser: CreateUserDto): Promise<string>{
+        try {
+            if(newUser.password !== newUser.password2){
+                throw new ForbiddenException('Las contraseñas no coinciden')
+            }
+            let oldUser = await this.usersRepository.findOneBy({id: id})
+            const salt = await bcrypt.genSalt(5)
+            newUser.password = await bcrypt.hash(newUser.password, salt)
+            let updatedUser = this.usersRepository.merge(oldUser, newUser)
+            await this.usersRepository.save(updatedUser)
+            return updatedUser.id
+        } catch (error) {
+            throw new BadRequestException('Error al tratar de actualizar el registro', error)
+        }
     }
 
     async deleteUser(id: string): Promise<string>{
-        this.users = this.users.filter((user: UserEntity) => user.id !== id)
-        return id
+        try {
+            let findedUser = await this.usersRepository.findOneBy({id: id})
+            let result = await this.usersRepository.remove(findedUser)
+            return result.id
+        } catch (error) {
+            throw new BadRequestException('El registro no existe o no es posible eliminarlo')
+        }
     }
 
 }

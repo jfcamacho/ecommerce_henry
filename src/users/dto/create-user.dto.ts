@@ -4,23 +4,19 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class CreateUserDto {
 
-    @IsOptional()
-    @IsUUID()
-    @ApiProperty()
-    id?: string;
-
     /**
      * El email debe tener el formato adecuado para poder ser registrado
-     * @example test@email.com
+     * @example 'test2@email.com'
      */
     @IsString()
+    @IsNotEmpty()
     @IsEmail()
     email: string
 
 
     /**
      * El name debe poseer una cadena de entre 8 y 80 caracteres y no debe estar vacio
-     * @example Juan Vasquez
+     * @example 'Juan Vasquez'
      */
     @IsString()
     @IsNotEmpty()
@@ -52,7 +48,7 @@ export class CreateUserDto {
 
     /**
      * Contiene la dirección del usuario en formato string entre 8 y 80 caracteres
-     * @example Guayaquil, puerto bayarta - Ecuador
+     * @example 'Guayaquil, puerto bayarta - Ecuador'
      */
     @IsString()
     @Length(3, 80)
@@ -96,6 +92,6 @@ export class CreateUserDto {
     /**
      * Array en el cual se considera todas las ordenes asociadas a un determinado usuario
      */
-    @IsOptional()
-    orders?: OrderEntity[]
+    // @IsOptional()
+    // orders?: OrderEntity[]
 }

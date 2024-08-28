@@ -19,7 +19,7 @@ export class ArchivosService {
       if(imagenUrl){
         const product: Product = await this.productsRepository.getProductById(id)
         product.imgUrl = imagenUrl
-        const productUpdated = await this.productsRepository.updateProduct(product)
+        const productUpdated = await this.productsRepository.updateProduct(id, product)
         return productUpdated
       }
     } catch (err) {
