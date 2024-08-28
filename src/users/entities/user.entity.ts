@@ -58,12 +58,6 @@ export class UserEntity {
     })
     city?: string | undefined
 
-    @Column({
-        type: "text",
-        nullable: true
-    })
-    adress?: string
-
     @OneToMany(() => OrderEntity, (order)  => order.user)
     orders: OrderEntity[]
     
